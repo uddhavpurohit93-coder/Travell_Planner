@@ -20,6 +20,8 @@ import UpcomingTrips from "./components/UpcomingTrips";
 import { getPlaces } from "./services/places";
 import { getPlaceImage } from "./services/images";
 import { getWeather } from "./services/weather";
+import MapBox from "./components/MapBox";
+import PlanDisplay from "./components/PlanDisplay";
 
 const getRandomRating = () => (4 + Math.random()).toFixed(1);
 const getRandomDistance = () => (Math.random() * 5).toFixed(1);
@@ -38,6 +40,7 @@ function MainApp() {
 
   const [editId, setEditId] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   const token = localStorage.getItem("token");
 
@@ -366,10 +369,10 @@ function MainApp() {
         </div>
 
         {/* MAIN GRID */}
-        <div className="grid xl:grid-cols-12 gap-6 items-start">
+        <div className="grid xl:grid-cols-12 gap-6 items-start mt-6">
 
           {/* LEFT */}
-          <div className="2xl:col-span-5 space-y-6">
+          <div className="xl:col-span-5 space-y-6">
 
             <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
 
@@ -398,6 +401,33 @@ function MainApp() {
             <div className="mt-6">
               <WeatherBox weather={weather} />
             </div>
+            {/* MAP */}
+            {destination && (
+
+              <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
+
+                <h2 className="text-2xl font-bold mb-4">
+                  Destination Map 🗺️
+                </h2>
+
+                <MapBox destination={destination} />
+
+              </div>
+            )}
+
+            {/* AI PLAN */}
+            {plan && (
+
+              <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
+
+                <h2 className="text-2xl font-bold mb-4">
+                  AI Trip Plan 🚀
+                </h2>
+
+                <PlanDisplay plan={plan} />
+
+              </div>
+            )}
 
           </div>
 
@@ -415,7 +445,10 @@ function MainApp() {
             {/* UPCOMING */}
             <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
 
-              <UpcomingTrips trips={trips} />
+              <UpcomingTrips
+                trips={trips}
+                onView={(trip) => setSelectedTrip(trip)}
+              />
 
             </div>
 
@@ -440,9 +473,98 @@ function MainApp() {
         </div>
 
       </div>
+      {/* MODAL */}
+      {selectedTrip && (
+
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+
+          <div className="bg-[#18243d] w-full max-w-3xl rounded-3xl p-6 overflow-y-auto max-h-[90vh] relative">
+
+            <button
+              onClick={() => setSelectedTrip(null)}
+              className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 w-10 h-10 rounded-full"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-4xl font-bold mb-2">
+              {selectedTrip.destination}
+            </h2>
+
+            <p className="text-gray-300 mb-6">
+              📅 {selectedTrip.date}
+            </p>
+
+            <div className="space-y-6">
+
+              {selectedTrip.plan?.dayPlan?.map((day, i) => (
+
+                <div
+                  key={i}
+                  className="bg-white/10 rounded-3xl overflow-hidden"
+                >
+
+                  <img
+                    src={day.image}
+                    alt={day.place}
+                    className="w-full h-64 object-cover"
+                  />
+
+                  <div className="p-5">
+
+                    <h2 className="text-2xl font-bold">
+                      Day {day.day}: {day.place}
+                    </h2>
+
+                    <div className="flex gap-6 mt-3 text-gray-300">
+
+                      <p>⭐ {day.rating}</p>
+
+                      <p>📍 {day.distance} km</p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+
+            <div className="mt-6 bg-white/10 rounded-2xl p-5">
+
+              <h2 className="text-2xl font-bold mb-3">
+                🏨 Hotel & Budget
+              </h2>
+
+              <p>{selectedTrip.plan?.hotel}</p>
+
+              <div className="mt-4 text-gray-300 space-y-1">
+
+                <p>
+                  Hotel: ₹{selectedTrip.plan?.breakdown?.hotel}
+                </p>
+
+                <p>
+                  Food: ₹{selectedTrip.plan?.breakdown?.food}
+                </p>
+
+                <p>
+                  Travel: ₹{selectedTrip.plan?.breakdown?.travel}
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   );
+
 }
 
 export default MainApp;

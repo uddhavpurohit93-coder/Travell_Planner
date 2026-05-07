@@ -1,4 +1,4 @@
-function UpcomingTrips({ trips }) {
+function UpcomingTrips({ trips, onView }) {
 
   return (
 
@@ -9,9 +9,31 @@ function UpcomingTrips({ trips }) {
 
         <div>
 
-          <h2 className="text-4xl font-bold">
-            Upcoming Trips 📅
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+
+            <div>
+              <h2 className="text-3xl font-bold">
+                Upcoming Trips 📅
+              </h2>
+
+              <p className="text-gray-400 mt-1">
+                Your planned journeys & adventures
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                window.scrollTo({
+                  top: 1600,
+                  behavior: "smooth"
+                });
+              }}
+              className="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/20 transition"
+            >
+              Manage Trips
+            </button>
+
+          </div>
 
           <p className="text-gray-300 mt-2">
             Your planned journeys & adventures
@@ -93,21 +115,21 @@ function UpcomingTrips({ trips }) {
 
                 </div>
 
-                {/* RIGHT */}
-                <div className="text-left lg:text-right">
+                <div className="text-right">
 
-                  <p className="text-gray-400 text-sm">
-                    Estimated Budget
+                  <p className="text-green-300 font-bold text-xl">
+                    ₹{trip.budget}
                   </p>
 
-                  <h2 className="text-4xl font-bold text-green-300 mt-2">
-                    ₹{trip.budget}
-                  </h2>
+                  <p className="text-sm text-gray-400">
+                    Planned Trip
+                  </p>
 
-                  <button className="mt-5 px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition font-semibold shadow-xl">
-
+                  <button
+                    onClick={() => onView(trip)}
+                    className="mt-3 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition text-sm font-semibold"
+                  >
                     View Details 🚀
-
                   </button>
 
                 </div>

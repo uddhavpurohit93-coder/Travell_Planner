@@ -52,7 +52,15 @@ function TrendingDestinations({ setDestination }) {
 
         </div>
 
-        <button className="hidden md:block px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 transition border border-white/10">
+        <button
+          onClick={() => {
+            window.scrollTo({
+              top: 900,
+              behavior: "smooth"
+            });
+          }}
+          className="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/20 transition"
+        >
           View All
         </button>
 
