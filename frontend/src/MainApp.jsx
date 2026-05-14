@@ -1,385 +1,113 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 
-// icons
-import {
-  FaPlaneDeparture,
-  FaMapMarkedAlt,
-  FaCloudSun,
-  FaWallet,
-  FaSignOutAlt
-} from "react-icons/fa";
-
-// components
+import Navbar from "./components/Navbar";
+import HeroSection from "./components/HeroSection";
 import TripForm from "./components/TripForm";
-import TripList from "./components/TripList";
 import WeatherBox from "./components/WeatherBox";
-import TrendingDestinations from "./components/TrendingDestinations";
-import UpcomingTrips from "./components/UpcomingTrips";
-
-// services
-import { getPlaces } from "./services/places";
-import { getPlaceImage } from "./services/images";
-import { getWeather } from "./services/weather";
-import MapBox from "./components/MapBox";
-import PlanDisplay from "./components/PlanDisplay";
-
-const getRandomRating = () => (4 + Math.random()).toFixed(1);
-const getRandomDistance = () => (Math.random() * 5).toFixed(1);
+import PackingList from "./components/PackingList";
+import HotelSection from "./components/HotelSection";
+import PlanTimeline from "./components/PlanTimeline";
+import FoodRecommendations from "./components/FoodRecommendations";
+import HiddenGems from "./components/HiddenGems";
+import BudgetEstimator from "./components/BudgetEstimator";
+import TripList from "./components/TripList";
+import Footer from "./components/Footer";
 
 function MainApp() {
 
+  const [search, setSearch] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [budget, setBudget] = useState("");
   const [days, setDays] = useState("");
-  const [search, setSearch] = useState("");
-
+  const [trip, setTrip] = useState(null);
   const [trips, setTrips] = useState([]);
-  const [plan, setPlan] = useState(null);
-  const [weather, setWeatherState] = useState(null);
 
-  const [editId, setEditId] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState(null);
-
-  const token = localStorage.getItem("token");
-
-  let userId = "";
-
-  try {
-    if (token) {
-      const decoded = JSON.parse(atob(token.split(".")[1]));
-      userId = decoded.id;
-    }
-  } catch {
-    console.log("Invalid token");
-  }
-
-  // SAFE JSON
-  const safeJson = async (res) => {
-    const text = await res.text();
-
+  const fetchTrips = async () => {
     try {
-      return JSON.parse(text);
-    } catch {
-      console.log(text);
-      throw new Error(text);
-    }
-  };
-
-  // ================= GET TRIPS =================
-  const getTrips = useCallback(async () => {
-    try {
-
-      const res = await fetch(`http://localhost:5000/trips/${userId}`, {
-        headers: {
-          Authorization: "Bearer " + token
-        }
-      });
-
-      const data = await safeJson(res);
-
-      setTrips(data);
-
+      const res = await fetch("http://localhost:5000/api/trips/default-user");
+      const data = await res.json();
+      if (data.success) setTrips(data.data);
     } catch (err) {
       console.log(err);
     }
-  }, [userId, token]);
+  };
 
   useEffect(() => {
-    if (userId) {
-      getTrips();
-    }
-  }, [getTrips, userId]);
+    fetchTrips();
+  }, []);
 
-  // ================= GENERATE PLAN =================
-  const generatePlan = async () => {
-
-    if (!destination || !days || !budget) {
-      alert("Fill all fields");
-      return;
-    }
-
-    const places = await getPlaces(destination);
-
-    const dayPlan = [];
-
-    for (let i = 0; i < Number(days); i++) {
-
-      const place = places[i % places.length];
-
-      const image = await getPlaceImage(place, destination);
-
-      dayPlan.push({
-        day: i + 1,
-        place,
-        image,
-        rating: getRandomRating(),
-        distance: getRandomDistance()
-      });
-    }
-
-    const total = Number(budget);
-
-    const newPlan = {
-      dayPlan,
-
-      hotel:
-        total < 5000
-          ? `${destination} Budget Stay`
-          : total < 15000
-            ? `${destination} 3 Star Hotel`
-            : `${destination} Luxury Resort`,
-
-      breakdown: {
-        hotel: Math.round(total * 0.5),
-        food: Math.round(total * 0.3),
-        travel: Math.round(total * 0.2)
-      }
-    };
-
-    setPlan(newPlan);
-
-    const weatherData = await getWeather(destination);
-
-    setWeatherState(weatherData);
-  };
-
-  // ================= ADD =================
-  const handleSubmit = async () => {
-
-    if (!destination || !date || !budget) {
-      alert("Fill all fields");
-      return;
-    }
-
-    if (!plan) {
-      alert("Generate plan first 🚀");
-      return;
-    }
-
+  const handleGenerate = async () => {
     try {
-
-      const res = await fetch("http://localhost:5000/add-trip", {
+      const res = await fetch("http://localhost:5000/api/trips/generate", {
         method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-
-        body: JSON.stringify({
-          destination,
-          date,
-          budget,
-          userId,
-          plan
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination, date, budget, days })
       });
-
-      const data = await safeJson(res);
-
-      if (!res.ok) {
-        alert(data.message || "Save failed");
-        return;
-      }
-
-      alert("Trip Added ✅");
-
-      setDestination("");
-      setDate("");
-      setBudget("");
-      setPlan(null);
-
-      getTrips();
-
+      const data = await res.json();
+      if (data.success) setTrip(data.data);
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ================= DELETE =================
-  const deleteTrip = async (id) => {
+  const handleSave = async () => {
     try {
-
-      await fetch(`http://localhost:5000/delete-trip/${id}`, {
-        method: "DELETE",
-
-        headers: {
-          Authorization: "Bearer " + token
-        }
+      await fetch("http://localhost:5000/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination, date, budget, days, ...trip })
       });
-
-      getTrips();
-
+      fetchTrips();
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ================= UPDATE =================
-  const updateTrip = async () => {
+  const handleDelete = async (id) => {
     try {
-
-      await fetch(`http://localhost:5000/update-trip/${editId}`, {
-        method: "PUT",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-
-        body: JSON.stringify({
-          destination,
-          date,
-          budget,
-          userId,
-          plan
-        })
+      await fetch(`http://localhost:5000/api/trips/${id}`, {
+        method: "DELETE"
       });
-
-      setEditMode(false);
-      setEditId(null);
-
-      setDestination("");
-      setDate("");
-      setBudget("");
-      setPlan(null);
-
-      getTrips();
-
+      fetchTrips();
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ================= EDIT =================
-  const handleEdit = (trip) => {
-
-    setDestination(trip.destination);
-    setDate(trip.date);
-    setBudget(trip.budget);
-
-    setPlan(trip.plan);
-
-    setEditId(trip._id);
-
-    setEditMode(true);
-  };
-
-  // ================= LOGOUT =================
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
-
-  // ================= TOTAL BUDGET =================
-  const totalBudget = trips.reduce(
-    (acc, trip) => acc + Number(trip.budget),
-    0
-  );
-
-  // ================= UI =================
   return (
+    <div className="
+      min-h-screen
+      bg-[#020817]
+      text-white
+      overflow-x-hidden
+    ">
 
-    <div className="min-h-screen bg-gradient-to-br from-[#071120] via-[#0a1b3d] to-[#09152a] text-white">
+      <Navbar />
 
-      {/* HERO */}
-      <div
-        className="h-[350px] bg-cover bg-center relative"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80')"
-        }}
-      >
+      <HeroSection
+        search={search}
+        setSearch={setSearch}
+      />
 
-        <div className="absolute inset-0 bg-black/50"></div>
+      <div className="
+        max-w-7xl mx-auto
+        px-6 lg:px-10
+        py-24 space-y-28
+      ">
 
-        <div className="relative z-10 p-8">
-
-          {/* TOP BAR */}
-          <div className="flex justify-between items-center">
-
-            <div>
-              <h1 className="text-4xl font-bold">
-                Explore The World ✈️
-              </h1>
-
-              <p className="text-gray-300 mt-2">
-                Plan your dream journey with AI Travel Planner
-              </p>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-xl flex items-center gap-2"
-            >
-              <FaSignOutAlt />
-              Logout
-            </button>
-          </div>
-
-          {/* SEARCH */}
-          <div className="mt-8">
-            <input
-              placeholder="Search destination..."
-              className="w-full md:w-[600px] p-4 rounded-2xl bg-white/20 backdrop-blur-md border border-white/20 outline-none"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-        </div>
-      </div>
-
-      {/* DASHBOARD */}
-      <div className="w-full max-w-[1800px] mx-auto p-6 -mt-16 relative z-20">
-
-        {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl">
-            <FaPlaneDeparture className="text-3xl mb-3 text-blue-300" />
-            <p className="text-gray-300">Total Trips</p>
-            <h2 className="text-3xl font-bold">{trips.length}</h2>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl">
-            <FaWallet className="text-3xl mb-3 text-green-300" />
-            <p className="text-gray-300">Total Budget</p>
-            <h2 className="text-3xl font-bold">₹{totalBudget}</h2>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl">
-            <FaMapMarkedAlt className="text-3xl mb-3 text-pink-300" />
-            <p className="text-gray-300">Current Destination</p>
-            <h2 className="text-2xl font-bold">
-              {destination || "None"}
-            </h2>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-lg p-5 rounded-2xl shadow-xl">
-            <FaCloudSun className="text-3xl mb-3 text-yellow-300" />
-            <p className="text-gray-300">Weather</p>
-            <h2 className="text-2xl font-bold">
-              {weather?.temp || "--"}°
-            </h2>
-          </div>
-
-        </div>
-
-        {/* MAIN GRID */}
-        <div className="grid xl:grid-cols-12 gap-6 items-start mt-6">
+        {/* TOP GRID */}
+        <div className="grid xl:grid-cols-3 gap-10 items-start">
 
           {/* LEFT */}
-          <div className="xl:col-span-5 space-y-6">
-
-            <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
-
-              <h2 className="text-2xl font-bold mb-4">
-                Plan New Trip
-              </h2>
-
+          <div className="xl:col-span-2">
+            <div className="
+              bg-gradient-to-br from-white/10 to-white/5
+              border border-white/10
+              rounded-[40px] p-8
+              backdrop-blur-2xl
+              shadow-2xl shadow-cyan-500/10
+            ">
               <TripForm
                 destination={destination}
                 setDestination={setDestination}
@@ -389,182 +117,129 @@ function MainApp() {
                 setBudget={setBudget}
                 days={days}
                 setDays={setDays}
-                onGenerate={generatePlan}
-                onSubmit={handleSubmit}
-                editMode={editMode}
-                onUpdate={updateTrip}
+                onGenerate={handleGenerate}
+                onSubmit={handleSave}
               />
-
             </div>
-
-            {/* WEATHER */}
-            <div className="mt-6">
-              <WeatherBox weather={weather} />
-            </div>
-            {/* MAP */}
-            {destination && (
-
-              <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
-
-                <h2 className="text-2xl font-bold mb-4">
-                  Destination Map 🗺️
-                </h2>
-
-                <MapBox destination={destination} />
-
-              </div>
-            )}
-
-            {/* AI PLAN */}
-            {plan && (
-
-              <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
-
-                <h2 className="text-2xl font-bold mb-4">
-                  AI Trip Plan 🚀
-                </h2>
-
-                <PlanDisplay plan={plan} />
-
-              </div>
-            )}
-
           </div>
 
           {/* RIGHT */}
-          <div className="2xl:col-span-7 space-y-6">
-            {/* TRENDING */}
-            <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
+          <div className="space-y-8">
 
-              <TrendingDestinations
-                setDestination={setDestination}
-              />
-
+            {/* STATS */}
+            <div className="
+              bg-gradient-to-br from-cyan-500/10 to-blue-500/10
+              border border-cyan-400/20
+              rounded-[40px] p-8
+              backdrop-blur-2xl
+            ">
+              <p className="uppercase tracking-[5px] text-cyan-400 text-sm mb-5">
+                Travel Insights
+              </p>
+              <h2 className="text-4xl font-black mb-10 leading-tight">
+                AI Travel
+                <span className="text-cyan-400"> Stats ✨</span>
+              </h2>
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <p className="text-gray-400">Total Trips</p>
+                  <h2 className="text-5xl font-black mt-3">{trips.length}</h2>
+                </div>
+                <div>
+                  <p className="text-gray-400">Budget</p>
+                  <h2 className="text-4xl font-black mt-3">
+                    ₹{trips.reduce((a, b) => a + (b.budget || 0), 0)}
+                  </h2>
+                </div>
+              </div>
             </div>
 
-            {/* UPCOMING */}
-            <div className="bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10">
-
-              <UpcomingTrips
-                trips={trips}
-                onView={(trip) => setSelectedTrip(trip)}
-              />
-
-            </div>
+            {trip?.weather && <WeatherBox weather={trip.weather} />}
+            {trip?.packingList && <PackingList items={trip.packingList} />}
 
           </div>
-
         </div>
 
-        {/* TRIPS */}
-        <div className="mt-8 bg-white/10 backdrop-blur-lg p-6 rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
+        {/* HOTELS */}
+        {trip?.hotels?.length > 0 && (
+          <section className="space-y-10">
+            <div>
+              <h2 className="text-5xl font-black">Luxury Hotels 🏨</h2>
+              <p className="text-gray-400 mt-4 text-lg">Premium stays curated by AI</p>
+            </div>
+            <HotelSection hotels={trip.hotels} />
+          </section>
+        )}
 
-          <h2 className="text-3xl font-bold mb-6">
-            My Trips ✈️
-          </h2>
+        {/* TIMELINE */}
+        {trip?.plan?.dayPlan?.length > 0 && (
+          <section className="space-y-10">
+            <div>
+              <h2 className="text-5xl font-black">Travel Timeline ✈️</h2>
+              <p className="text-gray-400 mt-4 text-lg">Your complete AI trip experience</p>
+            </div>
+            <PlanTimeline dayPlan={trip.plan.dayPlan} />
+          </section>
+        )}
 
+        {/* FOOD */}
+        {trip?.plan?.foodRecommendations?.length > 0 && (
+          <section className="space-y-10">
+            <div>
+              <h2 className="text-5xl font-black">Food Recommendations 🍕</h2>
+              <p className="text-gray-400 mt-4 text-lg">Famous cafes & restaurants</p>
+            </div>
+            <FoodRecommendations foods={trip.plan.foodRecommendations} />
+          </section>
+        )}
+
+        {/* HIDDEN GEMS */}
+        {trip?.plan?.hiddenGems?.length > 0 && (
+          <section className="space-y-10">
+            <div>
+              <h2 className="text-5xl font-black">Hidden Gems 💎</h2>
+              <p className="text-gray-400 mt-4 text-lg">Explore secret places beyond tourist spots</p>
+            </div>
+            <HiddenGems gems={trip.plan.hiddenGems} />
+          </section>
+        )}
+
+        {/* BUDGET */}
+        {trip?.plan?.breakdown && (
+          <section className="space-y-10">
+            <div>
+              <h2 className="text-5xl font-black">Budget Breakdown 💰</h2>
+              <p className="text-gray-400 mt-4 text-lg">Smart expense planning</p>
+            </div>
+            <BudgetEstimator breakdown={trip.plan.breakdown} />
+          </section>
+        )}
+
+        {/* SAVED TRIPS */}
+        <section className="space-y-10">
+          <div>
+            <h2 className="text-5xl font-black">My Trips ✈️</h2>
+            <p className="text-gray-400 mt-4 text-lg">Your saved travel experiences</p>
+          </div>
           <TripList
             trips={trips}
             search={search}
-            onEdit={handleEdit}
-            onDelete={deleteTrip}
+            onEdit={(t) => {
+              setDestination(t.destination);
+              setDate(t.date);
+              setBudget(t.budget);
+              setDays(t.days);
+            }}
+            onDelete={handleDelete}
           />
-
-        </div>
+        </section>
 
       </div>
-      {/* MODAL */}
-      {selectedTrip && (
 
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-
-          <div className="bg-[#18243d] w-full max-w-3xl rounded-3xl p-6 overflow-y-auto max-h-[90vh] relative">
-
-            <button
-              onClick={() => setSelectedTrip(null)}
-              className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 w-10 h-10 rounded-full"
-            >
-              ✕
-            </button>
-
-            <h2 className="text-4xl font-bold mb-2">
-              {selectedTrip.destination}
-            </h2>
-
-            <p className="text-gray-300 mb-6">
-              📅 {selectedTrip.date}
-            </p>
-
-            <div className="space-y-6">
-
-              {selectedTrip.plan?.dayPlan?.map((day, i) => (
-
-                <div
-                  key={i}
-                  className="bg-white/10 rounded-3xl overflow-hidden"
-                >
-
-                  <img
-                    src={day.image}
-                    alt={day.place}
-                    className="w-full h-64 object-cover"
-                  />
-
-                  <div className="p-5">
-
-                    <h2 className="text-2xl font-bold">
-                      Day {day.day}: {day.place}
-                    </h2>
-
-                    <div className="flex gap-6 mt-3 text-gray-300">
-
-                      <p>⭐ {day.rating}</p>
-
-                      <p>📍 {day.distance} km</p>
-
-                    </div>
-
-                  </div>
-
-                </div>
-              ))}
-
-            </div>
-
-            <div className="mt-6 bg-white/10 rounded-2xl p-5">
-
-              <h2 className="text-2xl font-bold mb-3">
-                🏨 Hotel & Budget
-              </h2>
-
-              <p>{selectedTrip.plan?.hotel}</p>
-
-              <div className="mt-4 text-gray-300 space-y-1">
-
-                <p>
-                  Hotel: ₹{selectedTrip.plan?.breakdown?.hotel}
-                </p>
-
-                <p>
-                  Food: ₹{selectedTrip.plan?.breakdown?.food}
-                </p>
-
-                <p>
-                  Travel: ₹{selectedTrip.plan?.breakdown?.travel}
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      )}
+      <Footer />
 
     </div>
   );
-
 }
 
 export default MainApp;
