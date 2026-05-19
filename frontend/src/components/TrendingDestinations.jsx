@@ -98,7 +98,7 @@ function TrendingDestinations({ setDestination }) {
 
                 <div>
 
-                  <h2 className="text-3xl font-bold text-white">
+                  <h2 className="text-3xl font-bold text-slate-900">
                     {place.name}
                   </h2>
 
@@ -108,7 +108,7 @@ function TrendingDestinations({ setDestination }) {
 
                 </div>
 
-                <div className="bg-white/20 backdrop-blur-lg px-3 py-2 rounded-2xl text-sm text-white border border-white/20">
+                <div className="bg-white/20 backdrop-blur-lg px-3 py-2 rounded-2xl text-sm text-slate-900 border border-white/20">
 
                   ⭐ {place.rating}
 

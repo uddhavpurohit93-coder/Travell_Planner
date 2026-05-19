@@ -38,7 +38,7 @@ function TripList({
             <div
               key={t._id}
               className="
-                bg-[#101826]
+          bg-white
                 border border-white/10
                 rounded-2xl
                 overflow-hidden
@@ -73,7 +73,7 @@ function TripList({
 
                   <div className="
                     w-full h-full
-                    bg-[#0d1522]
+                 bg-[#f8fafc]
                   " />
 
                 )}
@@ -162,7 +162,7 @@ function TripList({
                     flex items-center
                     justify-between
                     p-4 rounded-2xl
-                    bg-[#0d1522]
+                  bg-[#f8fafc]
                     border border-white/10
                     mb-5
                   ">
@@ -224,7 +224,7 @@ function TripList({
 
                   <div className="
                     p-4 rounded-2xl
-                    bg-[#0d1522]
+                  bg-[#f8fafc]
                     border border-white/10
                   ">
 
@@ -254,7 +254,7 @@ function TripList({
 
                   <div className="
                     p-4 rounded-2xl
-                    bg-[#0d1522]
+               bg-[#f8fafc]
                     border border-white/10
                   ">
 
@@ -299,7 +299,7 @@ function TripList({
                       className="
                         flex gap-4
                         p-4 rounded-2xl
-                        bg-[#0d1522]
+                   bg-[#f8fafc]
                         border border-white/10
                       "
                     >
@@ -408,7 +408,7 @@ function TripList({
 
                   <div className="
                     p-4 rounded-2xl
-                    bg-[#0d1522]
+               bg-[#f8fafc]
                     border border-white/10
                   ">
 
@@ -435,7 +435,7 @@ function TripList({
 
                   <div className="
                     p-4 rounded-2xl
-                    bg-[#0d1522]
+            bg-[#f8fafc]
                     border border-white/10
                   ">
 
@@ -462,7 +462,7 @@ function TripList({
 
                   <div className="
                     p-4 rounded-2xl
-                    bg-[#0d1522]
+                   bg-[#f8fafc]
                     border border-white/10
                   ">
 

@@ -9,10 +9,34 @@ function WeatherBox({ weather }) {
 
   if (!weather) return null;
 
+  const temperature =
+    weather.temp ??
+    weather.temperature ??
+    weather.currentTemp ??
+    weather.main?.temp ??
+    "N/A";
+
+  const condition =
+    weather.condition ??
+    weather.description ??
+    weather.weather?.[0]?.description ??
+    "Clear";
+
+  const humidity =
+    weather.humidity ??
+    weather.main?.humidity ??
+    "N/A";
+
+  const wind =
+    weather.wind ??
+    weather.windSpeed ??
+    weather.wind?.speed ??
+    "N/A";
+
   return (
 
     <div className="
-      bg-[#101826]
+  bg-white
       border border-white/10
       rounded-2xl
       p-6
@@ -57,7 +81,7 @@ function WeatherBox({ weather }) {
               text-3xl font-bold mt-2
             ">
 
-              {weather.temp}°C
+              {temperature !== "N/A" ? `${temperature}°C` : "N/A"}
 
             </h2>
 
@@ -86,9 +110,10 @@ function WeatherBox({ weather }) {
           mt-4
           text-lg
           text-gray-300
+          capitalize
         ">
 
-          {weather.condition}
+          {condition}
 
         </p>
 
@@ -103,7 +128,7 @@ function WeatherBox({ weather }) {
 
           <div className="
             p-4 rounded-2xl
-            bg-[#0d1522]
+           bg-[#f8fafc]
             border border-white/10
           ">
 
@@ -126,7 +151,7 @@ function WeatherBox({ weather }) {
               text-xl font-bold mt-1
             ">
 
-              {weather.temp}°
+              {temperature !== "N/A" ? `${temperature}°` : "N/A"}
 
             </h3>
 
@@ -136,7 +161,7 @@ function WeatherBox({ weather }) {
 
           <div className="
             p-4 rounded-2xl
-            bg-[#0d1522]
+           bg-[#f8fafc]
             border border-white/10
           ">
 
@@ -159,7 +184,7 @@ function WeatherBox({ weather }) {
               text-xl font-bold mt-1
             ">
 
-              {weather.humidity || 50}%
+              {humidity !== "N/A" ? `${humidity}%` : "N/A"}
 
             </h3>
 
@@ -169,7 +194,7 @@ function WeatherBox({ weather }) {
 
           <div className="
             p-4 rounded-2xl
-            bg-[#0d1522]
+       bg-[#f8fafc]
             border border-white/10
           ">
 
@@ -192,7 +217,7 @@ function WeatherBox({ weather }) {
               text-xl font-bold mt-1
             ">
 
-              12 km/h
+              {wind !== "N/A" ? `${wind} km/h` : "N/A"}
 
             </h3>
 
