@@ -1,0 +1,12 @@
+.brand-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brand-logo-img {
+  width: 185px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
