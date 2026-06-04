@@ -7,6 +7,9 @@ import {
 function HotelSection({ hotels }) {
   console.log("HOTELS DATA:", hotels);
 
+  const fallbackImage =
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200";
+
   return (
     <section className="mt-20">
       {/* HEADING */}
@@ -53,89 +56,101 @@ function HotelSection({ hotels }) {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {hotels.map((hotel, index) => (
-            <div
-              key={index}
-              className="
-                group relative overflow-hidden
-                rounded-[32px]
-                border border-slate-200
-                bg-white
-                hover:-translate-y-2
-                transition-all duration-500
-                shadow-sm hover:shadow-xl
-              "
-            >
-              {/* IMAGE */}
-              <div className="relative overflow-hidden h-[320px]">
-                <img
-                  src={hotel.image}
-                  alt={hotel.name}
-                  className="
-                    w-full h-full object-cover
-                    group-hover:scale-110
-                    transition-transform duration-700
-                  "
-                />
+          {hotels.map((hotel, index) => {
+            const image =
+              hotel?.image && hotel.image.trim() !== ""
+                ? hotel.image
+                : fallbackImage;
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                {/* RATING */}
-                <div
-                  className="
-                    absolute top-5 right-5
-                    px-4 py-2 rounded-full
-                    bg-white/90 backdrop-blur-md
-                    border border-white/60
-                    flex items-center gap-2
-                    text-sm font-semibold text-slate-900
-                  "
-                >
-                  <Star
-                    size={16}
-                    className="text-yellow-400 fill-yellow-400"
+            return (
+              <div
+                key={index}
+                className="
+                  group relative overflow-hidden
+                  rounded-[32px]
+                  border border-slate-200
+                  bg-white
+                  hover:-translate-y-2
+                  transition-all duration-500
+                  shadow-sm hover:shadow-xl
+                "
+              >
+                {/* IMAGE */}
+                <div className="relative overflow-hidden h-[320px]">
+                  <img
+                    src={image}
+                    alt={hotel?.name || "Hotel"}
+                    className="
+                      w-full h-full object-cover
+                      group-hover:scale-110
+                      transition-transform duration-700
+                    "
+                    onError={(e) => {
+                      e.currentTarget.src = fallbackImage;
+                    }}
                   />
-                  {hotel.rating}
-                </div>
 
-                {/* TEXT */}
-                <div className="absolute bottom-0 p-6 w-full">
-                  <h2 className="text-3xl font-bold text-white">
-                    {hotel.name}
-                  </h2>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                  <div className="flex items-center gap-2 text-slate-200 mt-3">
-                    <MapPin size={18} />
-                    <p className="text-sm">{hotel.location}</p>
+                  {/* RATING */}
+                  <div
+                    className="
+                      absolute top-5 right-5
+                      px-4 py-2 rounded-full
+                      bg-white/90 backdrop-blur-md
+                      border border-white/60
+                      flex items-center gap-2
+                      text-sm font-semibold text-slate-900
+                    "
+                  >
+                    <Star
+                      size={16}
+                      className="text-yellow-400 fill-yellow-400"
+                    />
+                    {hotel?.rating || "4.5"}
+                  </div>
+
+                  {/* TEXT */}
+                  <div className="absolute bottom-0 p-6 w-full">
+                    <h2 className="text-3xl font-bold text-white">
+                      {hotel?.name || "Luxury Hotel"}
+                    </h2>
+
+                    <div className="flex items-center gap-2 text-slate-200 mt-3">
+                      <MapPin size={18} />
+                      <p className="text-sm">
+                        {hotel?.location || "Prime Location"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* FOOTER */}
-              <div className="p-6 flex items-center justify-between">
-                <div>
-                  <p className="text-slate-500 text-sm">
-                    Starting From
-                  </p>
+                {/* FOOTER */}
+                <div className="p-6 flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-500 text-sm">
+                      Starting From
+                    </p>
 
-                  <h3 className="text-3xl font-bold text-cyan-500 mt-1">
-                    ₹{hotel.price}
-                  </h3>
+                    <h3 className="text-3xl font-bold text-cyan-500 mt-1">
+                      ₹{Number(hotel?.price || 2500).toLocaleString()}
+                    </h3>
+                  </div>
+
+                  <button
+                    className="
+                      px-5 py-3 rounded-2xl
+                      bg-gradient-to-r from-cyan-500 to-blue-500
+                      text-white font-semibold
+                      hover:scale-105 transition-all
+                    "
+                  >
+                    Book Now
+                  </button>
                 </div>
-
-                <button
-                  className="
-                    px-5 py-3 rounded-2xl
-                    bg-gradient-to-r from-cyan-500 to-blue-500
-                    text-white font-semibold
-                    hover:scale-105 transition-all
-                  "
-                >
-                  Book Now
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>

@@ -1,133 +1,169 @@
 const Groq = require("groq-sdk");
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey:process.env.GROQ_API_KEY,
 });
 
-exports.generateAITrip = async (
-  destination,
-  budget,
-  days,
-  weather
-) => {
-
+exports.generateAITrip = async (destination, budget, days, weather) => {
   const prompt = `
-Generate a complete ${days} days luxury travel plan for ${destination}
-under budget ₹${budget}.
+You are a professional travel planner AI.
 
-Current weather:
-Temperature: ${weather?.temperature}°C
+Generate a complete ${days}-day travel itinerary for ${destination}
+with a total budget of ₹${budget}.
+
+Weather:
+Temperature: ${weather?.temperature}
 Condition: ${weather?.condition}
 
-IMPORTANT:
-Return ONLY valid JSON.
-Do not add markdown.
-Do not add explanation.
-Do not use \`\`\`json.
+IMPORTANT RULES:
 
-VERY IMPORTANT RULES:
+1. Return ONLY valid JSON.
+2. No markdown.
+3. No explanation.
+4. No text outside JSON.
+5. Generate EXACTLY ${days} days.
+6. Each day must contain 3-5 tourist places.
+7. No duplicate places.
+8. Add realistic distances.
+9. Add transport details between places.
+HOTEL RULES:
+- Return EXACTLY 5 hotels
+- Must all be different
+- Must be real hotels in destination with their real photos
 
-- You MUST generate EXACTLY ${days} unique dayPlan objects
-- Do NOT generate less than ${days} days
-- foodRecommendations MUST contain at least 5 REAL famous restaurants or cafes from ${destination}
-- hiddenGems MUST contain at least 3 REAL hidden places from ${destination}
-- transport MUST contain at least 3 transport options used in ${destination}
-- hotels MUST contain at least 3 REAL hotels from ${destination}
-- All recommendations must belong to ${destination}
-- Never return empty arrays
-- estimatedTotal must stay under ₹${budget}
+FOOD RULES:
+- Return EXACTLY 8 food recommendations
+- Include famous restaurants and cafes
+- No duplicates
+- include real phtos of cafes or hotels
+
+HIDDEN GEMS RULES:
+- Return EXACTLY 5 hidden gems
+- Must be lesser-known real places
+- No duplicates
+- use real photos of hidden gems
+
+TRANSPORT RULES:
+For every day create transport array.
+
+Example:
+
+"transport": [
+ {
+   "from":"City Palace",
+   "to":"Lake Pichola",
+   "distance":"2 km",
+   "transport":"Auto Rickshaw",
+   "time":"10 min"
+ },
+ {
+   "from":"Lake Pichola",
+   "to":"Bagore Ki Haveli",
+   "distance":"1 km",
+   "transport":"Walk",
+   "time":"12 min"
+ }
+]
 
 JSON FORMAT:
 
 {
   "hotels": [
     {
-      "name": "Real Hotel Name",
-      "location": "${destination}",
-      "rating": 4.8,
-      "price": "12000"
-    },
-
-    {
-      "name": "Luxury Resort",
-      "location": "${destination}",
-      "rating": 4.7,
-      "price": "18000"
-    },
-
-    {
-      "name": "Budget Stay",
-      "location": "${destination}",
+      "name": "",
+      "location": "",
       "rating": 4.5,
-      "price": "7000"
+      "price": ""
     }
   ],
 
-  "packingList": [
-    "Cotton clothes",
-    "Sunscreen",
-    "Shoes"
-  ],
+  "packingList": [],
 
   "dayPlan": [
     {
       "day": 1,
-      "place": "Place Name",
-      "image": "",
-      "rating": "4.5",
-      "distance": "2 km",
-      "description": "Beautiful tourist attraction"
+
+      "schedule": [
+        {
+          "time": "Morning",
+          "place": "",
+          "description": "",
+          "distance": "0 km"
+        },
+        {
+          "time": "Afternoon",
+          "place": "",
+          "description": "",
+          "distance": "2 km"
+        },
+        {
+          "time": "Evening",
+          "place": "",
+          "description": "",
+          "distance": "1.5 km"
+        }
+      ],
+
+      "transport": [
+        {
+          "from": "",
+          "to": "",
+          "distance": "",
+          "transport": "",
+          "time": ""
+        }
+      ]
     }
   ],
 
+  "foodRecommendations": [],
+
+  "hiddenGems": [],
+
   "transport": [
     "Taxi",
-    "Scooter",
-    "Auto Rickshaw"
-  ],
-
-  "foodRecommendations": [
-    "Restaurant 1",
-    "Restaurant 2",
-    "Restaurant 3",
-    "Restaurant 4",
-    "Restaurant 5"
-  ],
-
-  "hiddenGems": [
-    "Hidden Place 1",
-    "Hidden Place 2",
-    "Hidden Place 3"
+    "Auto",
+    "Bus"
   ],
 
   "breakdown": {
-    "hotel": 5000,
-    "food": 3000,
-    "travel": 2000,
-    "activities": 2000
+    "hotel": 0,
+    "food": 0,
+    "travel": 0,
+    "activities": 0
   },
 
-  "estimatedTotal": 12000
+  "estimatedTotal": 0
 }
+
+Transport Example:
+
+{
+  "from": "City Palace",
+  "to": "Lake Pichola",
+  "distance": "2 km",
+  "transport": "Auto Rickshaw",
+  "time": "10 min"
+}
+
+Return only JSON.
 `;
 
-  const response =
-    await groq.chat.completions.create({
-
+  try {
+    const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-
       messages: [
         {
           role: "user",
           content: prompt,
         },
       ],
-
       temperature: 0.7,
     });
 
-  return response
-    .choices[0]
-    .message
-    .content;
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error("AI Trip Error:", error);
+    throw new Error("Failed to generate trip plan");
+  }
 };

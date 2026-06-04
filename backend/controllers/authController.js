@@ -2,7 +2,8 @@ const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "travel_secret_key";
+const JWT_SECRET = "travel_secret_key"
+;
 
 // ✅ SIGNUP — stores user in DB, does NOT return a session token
 exports.signup = async (req, res) => {

@@ -8,134 +8,324 @@ exports.addTrip = async (req, res) => {
   try {
     const { destination, date, budget, days, userId } = req.body;
 
-    // ✅ Server-side date validation — reject past dates
+    // DATE VALIDATION
     if (date) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
       const tripDate = new Date(date);
+
       if (tripDate < today) {
         return res.status(400).json({
           success: false,
-          message: "Travel date cannot be in the past. Please choose a future date.",
+          message: "Travel date cannot be in the past",
         });
       }
     }
 
-    // 🌤 WEATHER
+    // WEATHER
     const weather = await getWeather(destination);
 
-    // 🤖 AI PLAN
-    const aiPlan = await generateAITrip(destination, budget, days, weather);
+    // AI PLAN
+    const aiPlan = await generateAITrip(
+      destination,
+      budget,
+      days,
+      weather
+    );
 
-    // 🧹 CLEAN AI RESPONSE
-    const cleanResponse = aiPlan.replace(/```json/g, "").replace(/```/g, "").trim();
+    const cleanResponse = aiPlan
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    // 🔄 STRING → JSON
-    const parsedPlan = JSON.parse(cleanResponse);
+    let parsedPlan;
 
-    // 🖼 DAY PLAN IMAGES
-    if (parsedPlan.dayPlan) {
-      for (const item of parsedPlan.dayPlan) {
-        item.image = await getPlaceImage(`${item.place} ${destination}`);
+    try {
+      parsedPlan = JSON.parse(cleanResponse);
+    } catch (err) {
+      console.log("JSON ERROR:", err);
+
+      return res.status(500).json({
+        success: false,
+        message: "AI returned invalid JSON",
+      });
+    }
+
+    if (!parsedPlan?.dayPlan) {
+      return res.status(500).json({
+        success: false,
+        message: "Invalid AI response",
+      });
+    }
+
+    // ==========================
+    // DAY PLAN FIX
+    // ==========================
+
+    parsedPlan.dayPlan = await Promise.all(
+      parsedPlan.dayPlan.map(async (day) => {
+        let schedule = Array.isArray(day.schedule)
+          ? day.schedule
+          : [];
+
+        // fallback places
+        if (schedule.length === 0) {
+          schedule = [
+            {
+              place: "Main Attraction",
+              description: "Visit famous tourist attraction",
+              distance: "2 km",
+              transport: "Taxi",
+            },
+            {
+              place: "Local Market",
+              description: "Shopping and local culture",
+              distance: "1.5 km",
+              transport: "Walk",
+            },
+            {
+              place: "Sunset Point",
+              description: "Evening sightseeing",
+              distance: "3 km",
+              transport: "Cab",
+            },
+          ];
+        }
+
+        // transport fallback
+        schedule = schedule.map((item) => ({
+          ...item,
+          distance: item.distance || "2 km",
+          transport: item.transport || "Taxi",
+        }));
+
+        const firstPlace =
+          schedule[0]?.place || destination;
+
+        const image = await getPlaceImage(
+          `${firstPlace} ${destination}`
+        );
+
+        return {
+          day: day.day,
+          image,
+          schedule,
+        };
+      })
+    );
+
+    // ==========================
+    // HOTELS
+    // ==========================
+
+    const hotelsWithImages = [];
+
+    if (parsedPlan.hotels) {
+      for (const hotel of parsedPlan.hotels) {
+        const image = await getPlaceImage(
+          `${hotel.name} hotel ${destination}`
+        );
+
+        const cleanPrice = Number(
+          (hotel.price || "")
+            .toString()
+            .replace(/[^0-9]/g, "")
+        );
+
+        hotelsWithImages.push({
+          ...hotel,
+          price: cleanPrice,
+          image,
+        });
       }
     }
 
-    // 🏨 HOTEL IMAGES
-    const hotelPhotos = [
-      await getPlaceImage(`${destination} luxury hotel`),
-      await getPlaceImage(`${destination} resort`),
-      await getPlaceImage(`${destination} heritage hotel`),
-    ];
+    // ==========================
+    // FOOD
+    // ==========================
 
-    // 🍔 FOOD IMAGES
-    const foodPhotos = [];
+    const foodRecommendations = [];
+
     if (parsedPlan.foodRecommendations) {
       for (const food of parsedPlan.foodRecommendations) {
-        const foodName = typeof food === "string" ? food : food.name;
-        const foodImage = await getPlaceImage(`${foodName} food ${destination}`);
-        foodPhotos.push({ name: foodName, image: foodImage });
+        const name =
+          typeof food === "string"
+            ? food
+            : food.name;
+
+        const image = await getPlaceImage(
+          `${name} restaurant ${destination}`
+        );
+
+        foodRecommendations.push({
+          name,
+          image,
+        });
       }
     }
 
-    // 💎 HIDDEN GEMS IMAGES
-    const gemsWithImages = [];
+    // ==========================
+    // HIDDEN GEMS
+    // ==========================
+
+    const hiddenGems = [];
+
     if (parsedPlan.hiddenGems) {
       for (const gem of parsedPlan.hiddenGems) {
-        const gemName = typeof gem === "string" ? gem : gem.name;
-        const gemImage = await getPlaceImage(`${gemName} ${destination}`);
-        gemsWithImages.push({ name: gemName, image: gemImage });
+        const name =
+          typeof gem === "string"
+            ? gem
+            : gem.name;
+
+        const image = await getPlaceImage(
+          `${name} tourist attraction ${destination}`
+        );
+
+        hiddenGems.push({
+          name,
+          image,
+        });
       }
     }
 
-    // ✅ Use the real userId from request body (set by frontend from auth)
-    const savedUserId = userId || "default-user";
+    // SAVE TRIP
 
-    // 💾 SAVE TO DB
     const newTrip = new Trip({
       destination,
       date,
       budget,
       days,
-      userId: savedUserId,
+      userId: userId || "default-user",
       weather,
-      packingList: parsedPlan.packingList || [],
+
+      packingList:
+        parsedPlan.packingList || [],
+
       plan: {
-        ...parsedPlan,
-        hotels: [
-          { name: `${destination} Grand Palace`, location: destination, rating: 4.8, price: "18000", image: hotelPhotos[0] },
-          { name: `${destination} Luxury Resort`, location: destination, rating: 4.7, price: "24000", image: hotelPhotos[1] },
-          { name: `${destination} Heritage Stay`, location: destination, rating: 4.6, price: "12000", image: hotelPhotos[2] },
-        ],
-        foodRecommendations: foodPhotos,
-        hiddenGems: gemsWithImages,
-        transport: parsedPlan.transport?.map((item) => item.type || item) || [],
+        dayPlan: parsedPlan.dayPlan,
+
+        hotels: hotelsWithImages,
+
+        foodRecommendations,
+
+        hiddenGems,
+
+        transport:
+          parsedPlan.transport || [
+            "Taxi",
+            "Bus",
+            "Metro",
+          ],
+
+        breakdown:
+          parsedPlan.breakdown || {
+            hotel: 0,
+            food: 0,
+            travel: 0,
+            activities: 0,
+          },
+
+        estimatedTotal:
+          parsedPlan.estimatedTotal || 0,
       },
     });
 
     const result = await newTrip.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Trip generated and saved successfully",
+      message: "Trip generated successfully",
       data: result,
     });
-
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ success: false, message: "Error saving trip" });
+    console.log("FULL ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// 📥 GET TRIPS — user-specific
+// GET TRIPS
 exports.getTrips = async (req, res) => {
   try {
-    const data = await Trip.find({ userId: req.params.userId }).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data });
+    const trips = await Trip.find({
+      userId: req.params.userId,
+    }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: trips,
+    });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "Error fetching trips" });
+
+    res.status(500).json({
+      success: false,
+      message: "Error fetching trips",
+    });
   }
 };
 
-// ❌ DELETE TRIP
+// DELETE TRIP
 exports.deleteTrip = async (req, res) => {
   try {
-    await Trip.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true, message: "Trip deleted successfully" });
+    await Trip.findByIdAndDelete(
+      req.params.id
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Trip deleted successfully",
+    });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "Error deleting trip" });
+
+    res.status(500).json({
+      success: false,
+      message: "Error deleting trip",
+    });
   }
 };
 
-// ✏️ UPDATE TRIP
+// UPDATE TRIP
 exports.updateTrip = async (req, res) => {
   try {
-    const { destination, date, budget, days, userId, plan } = req.body;
-    await Trip.findByIdAndUpdate(req.params.id, { destination, date, budget, days, userId, plan });
-    res.status(200).json({ success: true, message: "Trip updated successfully" });
+    const {
+      destination,
+      date,
+      budget,
+      days,
+      userId,
+      plan,
+    } = req.body;
+
+    await Trip.findByIdAndUpdate(
+      req.params.id,
+      {
+        destination,
+        date,
+        budget,
+        days,
+        userId,
+        plan,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Trip updated successfully",
+    });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "Error updating trip" });
+
+    res.status(500).json({
+      success: false,
+      message: "Error updating trip",
+    });
   }
 };

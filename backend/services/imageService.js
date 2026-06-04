@@ -1,33 +1,36 @@
 const axios = require("axios");
 
-exports.getPlaceImage = async (
-  place
-) => {
-
+exports.getPlaceImage = async (place) => {
   try {
 
-    const response =
-      await axios.get(
+    const searchQuery =
+      `${place} India tourism landmark`;
 
-`https://api.pexels.com/v1/search?query=${place}&per_page=1`,
-
+    const response = await axios.get(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchQuery)}&per_page=1`,
       {
         headers: {
           Authorization:
-            process.env.PEXELS_API_KEY
-        }
+            "OuO44qPiZXfsJyC1Wo7WV5URCQaSweXz9jEqdQKwH8UCVYX06diWQyMo",
+        },
       }
     );
 
-    return response
-      .data
-      .photos[0]
-      .src
-      .large;
+    if (
+      response.data.photos &&
+      response.data.photos.length > 0
+    ) {
+      return response.data.photos[0].src.large;
+    }
+
+    return "";
 
   } catch (error) {
 
-    console.log(error);
+    console.log(
+      "Image Fetch Error:",
+      error.response?.data || error.message
+    );
 
     return "";
   }

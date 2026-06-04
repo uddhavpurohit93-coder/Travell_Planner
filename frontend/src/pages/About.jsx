@@ -12,13 +12,13 @@ function About() {
     },
     {
       name: "Sneha Paliwal",
-      role: "Team Member",
-      image: "Developer",
+      role: "Developer",
+      image: "",
     },
     {
       name: "Saloni Choudhary",
-      role: "Team Member",
-      image: "Developer",
+      role: "Developer",
+      image: "",
     },
   ];
 

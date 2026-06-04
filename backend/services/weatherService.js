@@ -7,7 +7,7 @@ exports.getWeather = async (
   try {
 
     const apiKey =
-      process.env.WEATHER_API_KEY;
+      "7270fc29aebe8a7b06a2f4cac81c6f8a";
 
     const url =
 `https://api.openweathermap.org/data/2.5/weather?q=${destination}&appid=${apiKey}&units=metric`;

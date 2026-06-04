@@ -17,6 +17,11 @@ const tripSchema = new mongoose.Schema(
       required: true,
     },
 
+    days: {
+      type: Number,
+      required: true,
+    },
+
     travelers: {
       type: Number,
       default: 1,
@@ -31,36 +36,44 @@ const tripSchema = new mongoose.Schema(
       default: "guest-user",
     },
 
-    // 🌤 WEATHER
+    // 🌤 Weather
     weather: {
       temperature: String,
       condition: String,
       humidity: String,
     },
 
-    // 🎒 PACKING LIST
+    // 🎒 Packing List
     packingList: [String],
 
-    // 📅 AI PLAN
+    // 📅 AI Generated Plan
     plan: {
-      // 🗓 DAY PLAN
+      // 🗓 Day Wise Plan
       dayPlan: [
-        {
-          day: Number,
+ {
+   day: Number,
+   image: String,
 
-          place: String,
+   schedule: [
+     {
+       place: String,
+       description: String,
+       distance: String,
+     }
+   ],
 
-          image: String,
-
-          rating: String,
-
-          distance: String,
-
-          description: String,
-        },
-      ],
-
-      // 🏨 HOTELS
+   transport: [
+     {
+       from: String,
+       to: String,
+       distance: String,
+       transport: String,
+       time: String,
+     }
+   ]
+ }
+],
+      // 🏨 Hotels
       hotels: [
         {
           name: String,
@@ -75,10 +88,7 @@ const tripSchema = new mongoose.Schema(
         },
       ],
 
-      // 🚕 TRANSPORT
-      transport: [String],
-
-      // 🍔 FOOD RECOMMENDATIONS
+      // 🍔 Food Recommendations
       foodRecommendations: [
         {
           name: String,
@@ -87,7 +97,7 @@ const tripSchema = new mongoose.Schema(
         },
       ],
 
-      // 📍 HIDDEN GEMS
+      // 📍 Hidden Gems
       hiddenGems: [
         {
           name: String,
@@ -96,7 +106,10 @@ const tripSchema = new mongoose.Schema(
         },
       ],
 
-      // 💰 COST BREAKDOWN
+      // 🚖 General Transport
+      transport: [String],
+
+      // 💰 Budget Breakdown
       breakdown: {
         hotel: Number,
 
@@ -110,13 +123,12 @@ const tripSchema = new mongoose.Schema(
       estimatedTotal: Number,
     },
 
-    // ❤️ WISHLIST
+    // ❤️ Wishlist
     wishlist: {
       type: Boolean,
       default: false,
     },
   },
-
   {
     timestamps: true,
   }
