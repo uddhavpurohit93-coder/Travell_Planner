@@ -139,21 +139,22 @@ function HotelSection({ hotels }) {
                   </div>
 
                   <button
-                    className="
-                      px-5 py-3 rounded-2xl
-                      bg-gradient-to-r
-                      from-cyan-500
-                      to-blue-500
-                      text-white
-                      font-semibold
-                      hover:scale-105
-                      transition-all
-                      shadow-lg
-                      shadow-cyan-500/25
-                    "
-                  >
-                    Book Now
-                  </button>
+  onClick={() => window.open("https://www.booking.com", "_blank")}
+  className="
+    px-5 py-3 rounded-2xl
+    bg-gradient-to-r
+    from-cyan-500
+    to-blue-500
+    text-white
+    font-semibold
+    hover:scale-105
+    transition-all
+    shadow-lg
+    shadow-cyan-500/25
+  "
+>
+  Book Now
+</button>
                 </div>
 
                 {/* Premium Glow */}
