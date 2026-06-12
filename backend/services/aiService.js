@@ -1,15 +1,23 @@
 const Groq = require("groq-sdk");
 
 const groq = new Groq({
-  apiKey:process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-exports.generateAITrip = async (destination, budget, days, weather) => {
+exports.generateAITrip = async (
+  destination,
+  budget,
+  days,
+  weather
+) => {
+  const limitedDays = Math.min(Number(days), 10);
+
   const prompt = `
 You are a professional travel planner AI.
 
-Generate a complete ${days}-day travel itinerary for ${destination}
-with a total budget of ₹${budget}.
+Generate a complete ${limitedDays}-day travel itinerary for ${destination}.
+
+TOTAL TRIP BUDGET: ₹${budget}
 
 Weather:
 Temperature: ${weather?.temperature}
@@ -21,49 +29,57 @@ IMPORTANT RULES:
 2. No markdown.
 3. No explanation.
 4. No text outside JSON.
-5. Generate EXACTLY ${days} days.
-6. Each day must contain 3-5 tourist places.
+5. Generate EXACTLY ${limitedDays} days.
+6. Each day must contain EXACTLY 3 tourist places.
 7. No duplicate places.
-8. Add realistic distances.
-9. Add transport details between places.
+8. Keep descriptions very short (5-8 words max).
+9. Keep response compact.
+10. Use REAL places, hotels and restaurants.
+11. Everything must match the given budget.
+
 HOTEL RULES:
+
 - Return EXACTLY 5 hotels
-- Must all be different
-- Must be real hotels in destination with their real photos
+- All hotels must be different
+- Use REAL hotels from ${destination}
+- Hotel prices must be realistic
+
+BUDGET HOTEL SELECTION:
+
+IF TOTAL BUDGET <= 20000:
+- Select only budget hotels
+- Hotel price range: ₹800 - ₹2500 per night
+
+IF TOTAL BUDGET > 20000 AND <= 60000:
+- Select only mid-range hotels
+- Hotel price range: ₹2500 - ₹7000 per night
+
+IF TOTAL BUDGET > 60000:
+- Select only luxury hotels
+- Hotel price range: ₹7000 - ₹25000 per night
+
+DO NOT:
+- Return luxury hotels for budget trips
+- Return budget hotels for luxury trips
+- Repeat hotels
 
 FOOD RULES:
-- Return EXACTLY 8 food recommendations
-- Include famous restaurants and cafes
+
+- Return EXACTLY 4 food recommendations
+- Use famous restaurants/cafes from ${destination}
 - No duplicates
-- include real phtos of cafes or hotels
+- Match budget category
 
 HIDDEN GEMS RULES:
-- Return EXACTLY 5 hidden gems
-- Must be lesser-known real places
+
+- Return EXACTLY 3 hidden gems
+- Must be real places
 - No duplicates
-- use real photos of hidden gems
 
-TRANSPORT RULES:
-For every day create transport array.
+BUDGET BREAKDOWN RULES:
 
-Example:
-
-"transport": [
- {
-   "from":"City Palace",
-   "to":"Lake Pichola",
-   "distance":"2 km",
-   "transport":"Auto Rickshaw",
-   "time":"10 min"
- },
- {
-   "from":"Lake Pichola",
-   "to":"Bagore Ki Haveli",
-   "distance":"1 km",
-   "transport":"Walk",
-   "time":"12 min"
- }
-]
+- hotel + food + travel + activities = estimatedTotal
+- estimatedTotal should be close to ₹${budget}
 
 JSON FORMAT:
 
@@ -73,16 +89,13 @@ JSON FORMAT:
       "name": "",
       "location": "",
       "rating": 4.5,
-      "price": ""
+      "price": 0
     }
   ],
-
-  "packingList": [],
 
   "dayPlan": [
     {
       "day": 1,
-
       "schedule": [
         {
           "time": "Morning",
@@ -100,30 +113,23 @@ JSON FORMAT:
           "time": "Evening",
           "place": "",
           "description": "",
-          "distance": "1.5 km"
-        }
-      ],
-
-      "transport": [
-        {
-          "from": "",
-          "to": "",
-          "distance": "",
-          "transport": "",
-          "time": ""
+          "distance": "1 km"
         }
       ]
     }
   ],
 
-  "foodRecommendations": [],
+  "foodRecommendations": [
+    {
+      "name": ""
+    }
+  ],
 
-  "hiddenGems": [],
-
-  "transport": [
-    "Taxi",
-    "Auto",
-    "Bus"
+  "hiddenGems": [
+    {
+      "name": "",
+      "description": ""
+    }
   ],
 
   "breakdown": {
@@ -134,16 +140,6 @@ JSON FORMAT:
   },
 
   "estimatedTotal": 0
-}
-
-Transport Example:
-
-{
-  "from": "City Palace",
-  "to": "Lake Pichola",
-  "distance": "2 km",
-  "transport": "Auto Rickshaw",
-  "time": "10 min"
 }
 
 Return only JSON.
@@ -158,10 +154,20 @@ Return only JSON.
           content: prompt,
         },
       ],
-      temperature: 0.7,
+      temperature: 0.6,
+      max_tokens: 4000,
     });
 
-    return response.choices[0].message.content;
+    const content =
+      response?.choices?.[0]?.message?.content || "";
+
+    console.log("================================");
+    console.log("AI RESPONSE START");
+    console.log(content);
+    console.log("AI RESPONSE END");
+    console.log("================================");
+
+    return content;
   } catch (error) {
     console.error("AI Trip Error:", error);
     throw new Error("Failed to generate trip plan");

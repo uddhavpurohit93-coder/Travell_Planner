@@ -5,8 +5,6 @@ import {
 } from "lucide-react";
 
 function HotelSection({ hotels }) {
-  console.log("HOTELS DATA:", hotels);
-
   const fallbackImage =
     "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200";
 
@@ -19,11 +17,11 @@ function HotelSection({ hotels }) {
             Luxury Stays
           </p>
 
-          <h2 className="text-5xl font-bold mt-2 text-slate-900">
+          <h2 className="text-5xl font-bold mt-2 text-slate-900 dark:text-white">
             Recommended Hotels 🏨
           </h2>
 
-          <p className="text-slate-500 mt-4 max-w-2xl text-lg">
+          <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-2xl text-lg">
             Discover premium hotels and luxury stays curated for your destination.
           </p>
         </div>
@@ -32,8 +30,9 @@ function HotelSection({ hotels }) {
           className="
             hidden md:flex items-center gap-2
             px-6 py-3 rounded-2xl
-            bg-white border border-slate-200
-            text-slate-700
+            bg-white dark:bg-slate-900
+            border border-slate-200 dark:border-slate-700
+            text-slate-700 dark:text-slate-200
             hover:bg-cyan-500 hover:text-white
             transition-all shadow-sm
           "
@@ -43,13 +42,14 @@ function HotelSection({ hotels }) {
         </button>
       </div>
 
-      {/* EMPTY STATE */}
+      {/* EMPTY */}
       {!hotels || hotels.length === 0 ? (
         <div
           className="
             p-10 rounded-3xl
-            bg-white border border-slate-200
-            text-center text-slate-500
+            bg-white dark:bg-slate-900
+            border border-slate-200 dark:border-slate-700
+            text-center text-slate-500 dark:text-slate-400
           "
         >
           No hotel recommendations found.
@@ -68,11 +68,12 @@ function HotelSection({ hotels }) {
                 className="
                   group relative overflow-hidden
                   rounded-[32px]
-                  border border-slate-200
-                  bg-white
-                  hover:-translate-y-2
+                  bg-white dark:bg-slate-900
+                  border border-slate-200 dark:border-slate-700
+                  hover:-translate-y-3
                   transition-all duration-500
-                  shadow-sm hover:shadow-xl
+                  shadow-lg hover:shadow-2xl
+                  dark:shadow-black/30
                 "
               >
                 {/* IMAGE */}
@@ -90,7 +91,7 @@ function HotelSection({ hotels }) {
                     }}
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
                   {/* RATING */}
                   <div
@@ -110,7 +111,7 @@ function HotelSection({ hotels }) {
                     {hotel?.rating || "4.5"}
                   </div>
 
-                  {/* TEXT */}
+                  {/* HOTEL NAME */}
                   <div className="absolute bottom-0 p-6 w-full">
                     <h2 className="text-3xl font-bold text-white">
                       {hotel?.name || "Luxury Hotel"}
@@ -128,7 +129,7 @@ function HotelSection({ hotels }) {
                 {/* FOOTER */}
                 <div className="p-6 flex items-center justify-between">
                   <div>
-                    <p className="text-slate-500 text-sm">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">
                       Starting From
                     </p>
 
@@ -140,14 +141,33 @@ function HotelSection({ hotels }) {
                   <button
                     className="
                       px-5 py-3 rounded-2xl
-                      bg-gradient-to-r from-cyan-500 to-blue-500
-                      text-white font-semibold
-                      hover:scale-105 transition-all
+                      bg-gradient-to-r
+                      from-cyan-500
+                      to-blue-500
+                      text-white
+                      font-semibold
+                      hover:scale-105
+                      transition-all
+                      shadow-lg
+                      shadow-cyan-500/25
                     "
                   >
                     Book Now
                   </button>
                 </div>
+
+                {/* Premium Glow */}
+                <div
+                  className="
+                    absolute inset-0
+                    opacity-0 group-hover:opacity-100
+                    transition-opacity duration-500
+                    pointer-events-none
+                    bg-gradient-to-r
+                    from-cyan-500/5
+                    to-blue-500/5
+                  "
+                />
               </div>
             );
           })}

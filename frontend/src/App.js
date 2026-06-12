@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import AuthPage from "./AuthPage";
 import Navbar from "./components/Navbar";
@@ -15,8 +15,11 @@ import MapExplore from "./pages/MapExplore";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 function getStoredUser() {
-  try { return JSON.parse(localStorage.getItem("travelUser") || "{}"); } 
-  catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("travelUser") || "{}");
+  } catch {
+    return {};
+  }
 }
 
 function isAuthenticated() {
@@ -29,7 +32,7 @@ function isAdminUser() {
   return getStoredUser()?.isAdmin === true;
 }
 
-// ── Route guards ─────────────────────────────────────────────────────────
+// ── Route Guards ─────────────────────────────────────────────────────────
 function ProtectedRoute({ children, isLoggedIn }) {
   return isLoggedIn ? children : <Navigate to="/" replace />;
 }
@@ -40,9 +43,64 @@ function AdminRoute({ children, isLoggedIn }) {
   return children;
 }
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated);
+// ── Premium Layout Wrapper ───────────────────────────────────────────────
+function Layout({
+  children,
+  handleLogout,
+  theme,
+  setTheme,
+}) {
+  return (
+    <>
+      <Navbar
+        setIsLoggedIn={handleLogout}
+        theme={theme}
+        setTheme={setTheme}
+      />
 
+      <div
+        className="
+          min-h-screen
+          bg-gradient-to-br
+          from-slate-50
+          via-white
+          to-cyan-50
+          dark:from-slate-950
+          dark:via-slate-900
+          dark:to-slate-950
+          transition-colors
+          duration-500
+        "
+      >
+        {children}
+      </div>
+    </>
+  );
+}
+
+function App() {
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(isAuthenticated);
+
+  const [theme, setTheme] = useState(
+    localStorage.getItem("theme") || "light"
+  );
+
+  // ── Theme Controller ──────────────────────────────────────────────────
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior =
+      "smooth";
+
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // ── Logout ────────────────────────────────────────────────────────────
   const handleLogout = () => {
     localStorage.removeItem("travelToken");
     localStorage.removeItem("travelUser");
@@ -52,60 +110,176 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth screen */}
+
+        {/* Login / Register */}
         <Route
           path="/"
           element={
             isLoggedIn ? (
               <Navigate to="/home" replace />
             ) : (
-              <AuthPage setIsLoggedIn={setIsLoggedIn} />
+              <AuthPage
+                setIsLoggedIn={setIsLoggedIn}
+              />
             )
           }
         />
 
-        {/* Admin panel — no Navbar, completely isolated */}
+        {/* Admin */}
         <Route
           path="/admin/*"
           element={
-            <AdminRoute isLoggedIn={isLoggedIn}>
-              <AdminPanel onLogout={handleLogout} />
+            <AdminRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <AdminPanel
+                onLogout={handleLogout}
+              />
             </AdminRoute>
           }
         />
 
-        {/* Protected user pages */}
-        {[
-          { path: "/home", Component: Home },
-          { path: "/destinations", Component: Destinations },
-          { path: "/my-trips", Component: MyTrips },
-          { path: "/about", Component: About },
-          { path: "/help", Component: Help },
-          { path: "/contact", Component: Contact },
-        ].map(({ path, Component }) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <Navbar setIsLoggedIn={handleLogout} />
-                <Component />
-              </ProtectedRoute>
-            }
-          />
-        ))}
-
-        {/* Map explore page */}
+        {/* Home */}
         <Route
-          path="/map"
+          path="/home"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <MapExplore />
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <Home />
+              </Layout>
             </ProtectedRoute>
           }
         />
 
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/"} replace />} />
+        {/* Destinations */}
+        <Route
+          path="/destinations"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <Destinations />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Trips */}
+        <Route
+          path="/my-trips"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <MyTrips />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* About */}
+        <Route
+          path="/about"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <About />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Help */}
+        <Route
+          path="/help"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <Help />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Contact */}
+        <Route
+          path="/contact"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <Contact />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Map Explore */}
+        <Route
+          path="/map"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+            >
+              <Layout
+                handleLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+              >
+                <MapExplore />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to={
+                isLoggedIn
+                  ? "/home"
+                  : "/"
+              }
+              replace
+            />
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

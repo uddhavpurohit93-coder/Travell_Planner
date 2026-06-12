@@ -157,3 +157,7 @@ img {
 .soft-transition {
   transition: all 0.22s ease;
 }
+.dark body {
+  background: #020617;
+  color: white;
+}

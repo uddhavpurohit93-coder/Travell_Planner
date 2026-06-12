@@ -31,7 +31,10 @@ function HeroSection({ search, setSearch }) {
         flex
         items-center
         pt-28
-        bg-slate-950
+        bg-white
+        dark:bg-slate-950
+        transition-colors
+        duration-300
       "
     >
       {/* BACKGROUND IMAGE SLIDER */}
@@ -207,7 +210,7 @@ function HeroSection({ search, setSearch }) {
               shadow-black/30
             "
           >
-            {/* INPUT BOX */}
+            {/* INPUT */}
             <div
               className="
                 flex-1
@@ -217,12 +220,11 @@ function HeroSection({ search, setSearch }) {
                 px-5
                 rounded-2xl
                 bg-white
+                dark:bg-slate-900
                 border
                 border-white/30
+                dark:border-slate-700
                 shadow-sm
-                focus-within:ring-0
-                focus-within:outline-none
-                focus-within:border-white/30
               "
             >
               <MapPin size={22} className="text-sky-500" />
@@ -238,15 +240,11 @@ function HeroSection({ search, setSearch }) {
                   bg-transparent
                   text-lg
                   text-slate-900
+                  dark:text-white
                   placeholder:text-slate-400
+                  dark:placeholder:text-slate-500
                   outline-none
                   border-none
-                  ring-0
-                  focus:outline-none
-                  focus:ring-0
-                  focus:border-none
-                  focus-visible:outline-none
-                  focus-visible:ring-0
                 "
               />
             </div>
@@ -278,9 +276,6 @@ function HeroSection({ search, setSearch }) {
                 hover:scale-105
                 transition-all
                 duration-300
-                outline-none
-                focus:outline-none
-                focus:ring-0
                 active:scale-95
               "
             >
@@ -290,14 +285,7 @@ function HeroSection({ search, setSearch }) {
           </div>
 
           {/* DESTINATION CHIPS */}
-          <div
-            className="
-              flex
-              flex-wrap
-              gap-4
-              mt-10
-            "
-          >
+          <div className="flex flex-wrap gap-4 mt-10">
             {destinations.map((place, index) => (
               <button
                 key={index}
@@ -317,12 +305,6 @@ function HeroSection({ search, setSearch }) {
                   hover:scale-105
                   transition-all
                   duration-300
-                  outline-none
-                  focus:outline-none
-                  focus:ring-0
-                  focus-visible:outline-none
-                  focus-visible:ring-0
-                  active:scale-95
                 "
               >
                 {place}
@@ -331,16 +313,7 @@ function HeroSection({ search, setSearch }) {
           </div>
 
           {/* STATS */}
-          <div
-            className="
-              grid
-              grid-cols-2
-              md:grid-cols-4
-              gap-8
-              mt-20
-              pb-10
-            "
-          >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pb-10">
             <div>
               <h2 className="text-5xl font-black text-sky-400">10K+</h2>
               <p className="text-gray-300 mt-3">Trips Planned</p>
