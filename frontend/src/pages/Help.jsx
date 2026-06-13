@@ -76,6 +76,36 @@ function Help() {
             "
           />
         </div>
+        {search && (
+  <div
+    className="
+      p-6 rounded-3xl
+      bg-cyan-50 dark:bg-slate-900
+      border border-cyan-200 dark:border-slate-800
+      shadow-md
+    "
+  >
+    <h3 className="text-xl font-bold mb-2">
+      💡 Suggested Solution
+    </h3>
+
+    {filteredFaqs.length > 0 ? (
+      <div>
+        <p className="font-semibold text-cyan-600 dark:text-cyan-400">
+          {filteredFaqs[0].q}
+        </p>
+
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
+          {filteredFaqs[0].a}
+        </p>
+      </div>
+    ) : (
+      <p className="text-slate-500">
+        No exact solution found. Please contact our support team and we will help you shortly.
+      </p>
+    )}
+  </div>
+)}
 
         {/* QUICK LINKS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

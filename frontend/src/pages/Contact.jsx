@@ -1,198 +1,299 @@
-function Contact() {
-  const contactCards = [
-    {
-      icon: "📧",
-      title: "Email Us",
-      main: "support@travelai.com",
-      sub: "We reply within 24 hours",
-    },
-    {
-      icon: "📞",
-      title: "Call Us",
-      main: "+91 98765 43210",
-      sub: "Mon - Sat, 9AM - 6PM",
-    },
-    {
-      icon: "📍",
-      title: "Location",
-      main: "Jaipur, Rajasthan",
-      sub: "India 302001",
-    },
-    {
-      icon: "💬",
-      title: "Live Chat",
-      main: "Available on App",
-      sub: "24/7 Support",
-    },
-  ];
+import { useState } from "react";
+
+function Help() {
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [search, setSearch] = useState("");
+  const [selectedSolution, setSelectedSolution] = useState(null);
 
   const faqs = [
     {
+      q: "How do I create a new trip?",
+      a: "Go to Home page → Fill form → Generate Plan → Save Trip.",
+      keywords: ["trip", "plan", "travel", "create"],
+    },
+    {
       q: "How does AI Trip Planning work?",
-      a: "Our AI analyzes your destination, budget, and days to create a personalized day-by-day itinerary automatically.",
+      a: "AI creates itinerary, hotels, food, and budget automatically.",
+      keywords: ["ai", "planning", "itinerary"],
     },
     {
-      q: "Is Travel AI free to use?",
-      a: "Yes! Basic trip planning is completely free. Premium features are available for advanced users.",
+      q: "Can I edit or delete my trips?",
+      a: "Yes, go to My Trips section and edit or delete.",
+      keywords: ["edit", "delete", "update"],
     },
     {
-      q: "Can I edit my generated trip plan?",
-      a: "Absolutely! You can edit, update, or delete any trip from the My Trips section anytime.",
+      q: "How is the budget divided?",
+      a: "50% Hotel, 30% Food, 20% Travel.",
+      keywords: ["budget", "money", "cost"],
+    },
+    {
+      q: "How does Live Weather work?",
+      a: "We use OpenWeather API for real-time weather data.",
+      keywords: ["weather", "temperature"],
+    },
+    {
+      q: "What is Map feature?",
+      a: "Interactive map shows destination using Leaflet.",
+      keywords: ["map", "location"],
+    },
+    {
+      q: "Is my data safe?",
+      a: "Yes, secured with JWT authentication + MongoDB.",
+      keywords: ["security", "safe", "data"],
+    },
+    {
+      q: "How do I logout?",
+      a: "Click logout button in navbar.",
+      keywords: ["logout", "sign out"],
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+  const quickSolutions = {
+    "Getting Started": {
+      q: "How do I create a new trip?",
+      a: "Go to Home page → Enter destination, budget and days → Click Generate Plan → Save your trip.",
+    },
+    "Edit Trips": {
+      q: "How can I edit my trip?",
+      a: "Open My Trips → Select a trip → Click Edit → Update details and Save.",
+    },
+    "Budget Help": {
+      q: "How is budget managed?",
+      a: "Budget is divided automatically: Hotel (50%), Food (30%), Travel (20%).",
+    },
+    Login: {
+      q: "How do I login?",
+      a: "Click Login from Navbar and enter your registered email and password.",
+    },
+  };
 
-      {/* HERO */}
+  const guides = [
+    {
+      icon: "✈️",
+      title: "Plan Trip",
+      steps: ["Enter details", "Generate plan", "Save trip"],
+    },
+    {
+      icon: "✏️",
+      title: "Edit Trip",
+      steps: ["Go My Trips", "Click Edit", "Update & save"],
+    },
+    {
+      icon: "🗺️",
+      title: "Explore",
+      steps: ["Open Destinations", "Select place", "Start planning"],
+    },
+  ];
+
+  const filteredFaqs = faqs.filter((faq) => {
+    const query = search.toLowerCase();
+
+    return (
+      faq.q.toLowerCase().includes(query) ||
+      faq.keywords.some((keyword) =>
+        query.includes(keyword.toLowerCase())
+      )
+    );
+  });
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors">
       <div
-        className="relative h-[320px] bg-cover bg-center border-b border-slate-200 dark:border-slate-800"
+        className="relative h-[320px] bg-cover bg-center"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80')",
+            "url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600')",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/65 to-cyan-950/60" />
+        <div className="absolute inset-0 bg-black/70" />
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-cyan-100 px-5 py-2 rounded-full font-bold text-sm mb-5 backdrop-blur-md">
-            💬 We are here to help
-          </div>
-
-          <h1 className="text-6xl md:text-7xl font-black text-white">
-            Contact Us
+        <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
+          <h1 className="text-6xl font-black text-white">
+            Help Center 🆘
           </h1>
 
-          <p className="text-slate-200 mt-4 text-lg max-w-2xl">
-            Have a question, feedback, or travel planning issue? Send us a message.
+          <p className="text-white/80 mt-3 max-w-xl">
+            Search answers and solve your problems instantly
           </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
 
-        {/* CONTACT CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-12 -mt-24 relative z-20">
-          {contactCards.map((card, i) => (
-            <div
-              key={i}
-              className="bg-white dark:bg-slate-900
-                         border border-slate-200 dark:border-slate-800
-                         rounded-3xl p-6 text-center
-                         shadow-lg dark:shadow-black/30
-                         hover:border-cyan-500 hover:-translate-y-1
-                         transition-all duration-300"
-            >
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-3xl">
-                {card.icon}
-              </div>
-
-              <h3 className="font-bold text-lg mt-4">{card.title}</h3>
-
-              <p className="text-cyan-500 font-semibold mt-2">{card.main}</p>
-
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                {card.sub}
-              </p>
-            </div>
-          ))}
+        <div className="-mt-20 relative z-10">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setSelectedSolution(null);
+            }}
+            placeholder="Search your question..."
+            className="
+              w-full p-5 rounded-3xl
+              bg-white dark:bg-slate-900
+              border border-slate-200 dark:border-slate-800
+              shadow-xl outline-none
+              text-lg
+            "
+          />
         </div>
 
-        {/* FORM + MAP + FAQ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {selectedSolution && (
+          <div className="p-6 rounded-3xl bg-cyan-50 dark:bg-slate-900 border border-cyan-200 dark:border-slate-800 shadow-md">
+            <h3 className="text-xl font-bold mb-2">
+              💡 Quick Solution
+            </h3>
 
-          {/* FORM */}
-          <div className="bg-white dark:bg-slate-900
-                          border border-slate-200 dark:border-slate-800
-                          rounded-3xl p-8 shadow-lg dark:shadow-black/30">
+            <p className="font-semibold text-cyan-600 dark:text-cyan-400">
+              {selectedSolution.q}
+            </p>
 
-            <h2 className="text-2xl font-bold mb-2">Send Message ✉️</h2>
-
-            <form className="space-y-5">
-
-              {["Full Name", "Email Address", "Subject"].map((label, i) => (
-                <div key={i}>
-                  <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                    {label}
-                  </label>
-
-                  <input
-                    type="text"
-                    placeholder={label}
-                    className="w-full mt-2 px-4 py-3 rounded-xl
-                               bg-white dark:bg-slate-800
-                               border border-slate-200 dark:border-slate-700
-                               focus:border-cyan-500 outline-none
-                               transition-all"
-                  />
-                </div>
-              ))}
-
-              <div>
-                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                  Message
-                </label>
-
-                <textarea
-                  rows="5"
-                  placeholder="Write your message..."
-                  className="w-full mt-2 px-4 py-3 rounded-xl
-                             bg-white dark:bg-slate-800
-                             border border-slate-200 dark:border-slate-700
-                             focus:border-cyan-500 outline-none"
-                />
-              </div>
-
-              <button
-                type="button"
-                className="w-full py-4 rounded-xl font-bold text-white
-                           bg-gradient-to-r from-cyan-500 to-blue-500
-                           hover:scale-[1.02] transition-all"
-              >
-                Send Message 🚀
-              </button>
-            </form>
+            <p className="mt-2 text-slate-600 dark:text-slate-400">
+              {selectedSolution.a}
+            </p>
           </div>
+        )}
 
-          {/* FAQ */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">FAQs ❓</h2>
+        {search && (
+          <div className="p-6 rounded-3xl bg-cyan-50 dark:bg-slate-900 border border-cyan-200 dark:border-slate-800 shadow-md">
+            <h3 className="text-xl font-bold mb-2">
+              💡 Suggested Solution
+            </h3>
 
-            {faqs.map((faq, i) => (
+            {filteredFaqs.length > 0 ? (
+              <>
+                <p className="font-semibold text-cyan-600 dark:text-cyan-400">
+                  {filteredFaqs[0].q}
+                </p>
+
+                <p className="mt-2 text-slate-600 dark:text-slate-400">
+                  {filteredFaqs[0].a}
+                </p>
+              </>
+            ) : (
+              <p className="text-slate-500">
+                No exact solution found. Please contact support.
+              </p>
+            )}
+          </div>
+        )}
+                {/* QUICK LINKS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {["Getting Started", "Edit Trips", "Budget Help", "Login"].map(
+            (t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setSearch("");
+                  setSelectedSolution(quickSolutions[t]);
+                }}
+                className="
+                  p-5 rounded-2xl text-center
+                  bg-white dark:bg-slate-900
+                  border border-slate-200 dark:border-slate-800
+                  hover:-translate-y-1 transition-all
+                "
+              >
+                <p className="font-bold text-sm">{t}</p>
+              </button>
+            )
+          )}
+        </div>
+
+        {/* GUIDES */}
+        <div>
+          <h2 className="text-3xl font-black mb-6">Step Guides 📖</h2>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {guides.map((g) => (
+              <div
+                key={g.title}
+                className="
+                  p-6 rounded-3xl
+                  bg-white dark:bg-slate-900
+                  border border-slate-200 dark:border-slate-800
+                  hover:-translate-y-1 transition-all
+                "
+              >
+                <div className="text-4xl">{g.icon}</div>
+
+                <h3 className="font-black mt-3">{g.title}</h3>
+
+                <ul className="mt-4 space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                  {g.steps.map((s, i) => (
+                    <li key={i}>• {s}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div>
+          <h2 className="text-3xl font-black mb-6">FAQs ❓</h2>
+
+          <div className="space-y-3">
+            {filteredFaqs.map((f, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-slate-900
-                           border border-slate-200 dark:border-slate-800
-                           rounded-2xl p-4"
+                className="
+                  rounded-2xl overflow-hidden
+                  bg-white dark:bg-slate-900
+                  border border-slate-200 dark:border-slate-800
+                "
               >
-                <p className="font-bold text-cyan-500">Q: {faq.q}</p>
-                <p className="text-slate-600 dark:text-slate-300 mt-2">
-                  A: {faq.a}
-                </p>
+                <button
+                  onClick={() =>
+                    setActiveIndex(activeIndex === i ? null : i)
+                  }
+                  className="w-full p-5 flex justify-between"
+                >
+                  <span className="font-semibold">{f.q}</span>
+                  <span>{activeIndex === i ? "▲" : "▼"}</span>
+                </button>
+
+                {activeIndex === i && (
+                  <div className="p-5 text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                    {f.a}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* FOOTER SOCIAL */}
-        <div className="bg-slate-100 dark:bg-slate-900
-                        border border-slate-200 dark:border-slate-800
-                        rounded-3xl p-8 text-center">
+        {/* CTA */}
+        <div
+          className="
+            text-center p-8 rounded-3xl
+            bg-gradient-to-r from-cyan-50 to-blue-50
+            dark:from-slate-900 dark:to-slate-900
+            border border-slate-200 dark:border-slate-800
+          "
+        >
+          <h2 className="text-2xl font-black">
+            Still Need Help? 🤝
+          </h2>
 
-          <h2 className="text-2xl font-bold">Follow Us 🌐</h2>
+          <p className="text-slate-500 mt-2">
+            Contact our support team anytime
+          </p>
 
-          <div className="flex justify-center gap-4 mt-6 flex-wrap">
-            {["Twitter", "Instagram", "LinkedIn", "GitHub"].map((s, i) => (
-              <button
-                key={i}
-                className="px-6 py-3 rounded-xl font-semibold
-                           bg-white dark:bg-slate-800
-                           border border-slate-200 dark:border-slate-700
-                           hover:scale-105 transition-all"
-              >
-                {s}
-              </button>
-            ))}
+          <div className="flex gap-4 justify-center mt-6">
+            <button
+              onClick={() => (window.location.href = "/contact")}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold"
+            >
+              Contact
+            </button>
+
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700"
+            >
+              Home
+            </button>
           </div>
         </div>
 
@@ -201,4 +302,4 @@ function Contact() {
   );
 }
 
-export default Contact;
+export default Help;
